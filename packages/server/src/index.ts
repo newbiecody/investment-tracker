@@ -1,8 +1,9 @@
 import { initTRPC } from "@trpc/server";
 import express from "express";
-import * as trpc from "@trpc/server";
 import { z } from "zod";
-import { readAllFdXml } from "./scripts/retrieveReports";
+import { readAllFdXml } from "./scripts/retrieveFinancialDisclosureCollections";
+import { router, publicProcedure } from "trpc";
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
 const app = express();
 
@@ -24,18 +25,30 @@ const createContext = ({
 // Initialize tRPC with context
 const t = initTRPC.context<typeof createContext>().create();
 
-// Define the tRPC router
-const appRouter = t.router({
-  getUserById: t.procedure
-    .input(z.string()) // Validate that the input is a string
-    .query(({ input, ctx }) => {
-      // `input` is validated to be a string, and `ctx` contains the context (e.g., user info)
-      console.log(input);
-      //   const userId = input;
-      //   const user = ctx.user || 'Unknown User'; // Access user info from context
-      //   return `User ID: ${userId}, User: ${user}`;
+const appRouter = router({
+  userList: publicProcedure
+    .input((val: unknown) => {
+      return val as { name: string };
+    })
+    .query(async () => {
+      // Retrieve users from a datasource, this is an imaginary database
+      // const users = await db.user.findMany();
+      // return users;
     }),
 });
+export type AppRouter = typeof appRouter;
+// Define the tRPC router
+// const appRouter = t.router({
+//   getUserById: t.procedure
+//     .input(z.string()) // Validate that the input is a string
+//     .query(({ input, ctx }) => {
+//       // `input` is validated to be a string, and `ctx` contains the context (e.g., user info)
+//       console.log(input);
+//       //   const userId = input;
+//       //   const user = ctx.user || 'Unknown User'; // Access user info from context
+//       //   return `User ID: ${userId}, User: ${user}`;
+//     }),
+// });
 
 // Express setup
 app.use(express.json());
@@ -56,6 +69,9 @@ app.get("/trpc", async (req, res) => {
   //     res.status(500).json({ error: error.message });
   //   }
 });
-
-// Start the Express server
 app.listen(4000, () => {});
+// const server = createHTTPServer({
+//   router: appRouter,
+// });
+
+// server.listen(4000);
