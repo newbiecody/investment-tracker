@@ -1,0 +1,18 @@
+.navbar {
+    width: 100%;
+    .navbar-toggle {
+        display: none;
+    }
+}
+
+@media (min-width: 425) {
+    .navbar-toggle {
+        display: block;
+    }
+}
+@media (max-width: 425) {
+    
+}
+@media (max-width: 480) {
+    
+}
